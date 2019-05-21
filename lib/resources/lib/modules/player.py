@@ -30,7 +30,7 @@ import urllib
 import xmlrpclib
 
 import xbmc
-from resources.lib.modules import cleantitle, control, playcount
+from resources.lib.modules import cleantitle, control, playcount, bookmarks
 
 try:
     from sqlite3 import dbapi2 as database
@@ -56,8 +56,8 @@ class player(xbmc.Player):
 
             self.title = title
             self.year = year
-            self.name = urllib.quote_plus(title) + urllib.quote_plus(' (%s)' % year) if self.content == 'movie' else urllib.quote_plus(
-                title) + urllib.quote_plus(' S%02dE%02d' % (int(season), int(episode)))
+            self.name = urllib.quote_plus(title) if self.content == 'movie' else urllib.quote_plus(
+                title) + urllib.quote_plus(' S%01dE%01d' % (int(season), int(episode)))
             self.name = urllib.unquote_plus(self.name)
             self.season = '%01d' % int(season) if self.content == 'episode' else None
             self.episode = '%01d' % int(episode) if self.content == 'episode' else None
@@ -67,8 +67,6 @@ class player(xbmc.Player):
             self.tvdb = tvdb if tvdb is not None else '0'
             self.ids = {'imdb': self.imdb, 'tvdb': self.tvdb}
             self.ids = dict((k, v) for k, v in self.ids.iteritems() if not v == '0')
-
-            self.offset = bookmarks().get(self.name, self.year)
 
             poster, thumb, meta = self.getMeta(meta)
 
@@ -83,7 +81,6 @@ class player(xbmc.Player):
             control.resolve(int(sys.argv[1]), True, item)
 
             control.window.setProperty('script.trakt.ids', json.dumps(self.ids))
-
             self.keepPlaybackAlive()
 
             control.window.clearProperty('script.trakt.ids')
@@ -290,18 +287,27 @@ class player(xbmc.Player):
     def onPlayBackStarted(self):
         for i in range(0, 500):
             if not self.isPlayingVideo(): control.sleep(100)
-        if not self.offset == '0':
+
+        bookmark = bookmarks.get(self.name, str(self.year))
+
+        self.offset = 0.0
+        if not bookmark.offset == 0.0 and not self.getTotalTime() == 0.0:
+            self.offset = self.getTotalTime() * (bookmark.offset / 100)
+
+        if not self.offset == 0.0:
             self.seekTime(float(self.offset))
         subtitles().get(self.name, self.imdb, self.season, self.episode)
         self.idleForPlayback()
 
     def onPlayBackStopped(self):
-        bookmarks().reset(self.currentTime, self.totalTime, self.name, self.year)
         if control.setting('crefresh') == 'true':
             xbmc.executebuiltin('Container.Refresh')
 
         try:
-            if (self.currentTime / self.totalTime) >= .90:
+            progressPercentage = (self.currentTime / self.totalTime * 100)
+            bookmarks.insert(self.name, progressPercentage, self.year)
+
+            if progressPercentage >= 90:
                 self.libForPlayback()
         except:
             pass
@@ -423,83 +429,5 @@ class subtitles:
             xbmc.sleep(1000)
             xbmc.Player().setSubtitles(subtitle)
 
-        except Exception:
-            pass
-
-
-class bookmarks:
-    def get(self, name, year='0'):
-                    
-        try:
-            offset = '0'
-
-            if not control.setting('bookmarks') == 'true':
-                raise Exception()
-
-            idFile = hashlib.md5()
-            for i in name:
-                idFile.update(str(i))
-            for i in year:
-                idFile.update(str(i))
-            idFile = str(idFile.hexdigest())
-
-            dbcon = database.connect(control.bookmarksFile)
-            dbcur = dbcon.cursor()
-            dbcur.execute("SELECT * FROM bookmark WHERE idFile = '%s'" % idFile)
-            match = dbcur.fetchone()
-            self.offset = str(match[1])
-            dbcon.commit()
-
-            if self.offset == '0':
-                raise Exception()
-
-            minutes, seconds = divmod(float(self.offset), 60)
-            hours, minutes = divmod(minutes, 60)
-            label = '%02d:%02d:%02d' % (hours, minutes, seconds)
-            label = (control.lang(32502) % label).encode('utf-8')
-
-            try:
-                yes = control.dialog.contextmenu([label, control.lang(32501).encode('utf-8'), ])
-            except Exception:
-                yes = control.yesnoDialog(
-                    label, '', '', str(name),
-                    control.lang(32503).encode('utf-8'),
-                    control.lang(32501).encode('utf-8'))
-
-            if yes:
-                self.offset = '0'
-
-            return self.offset
-        except Exception:
-            return offset
-
-    def reset(self, currentTime, totalTime, name, year='0'):
-        try:
-            if not control.setting('bookmarks') == 'true':
-                raise Exception()
-
-            timeInSeconds = str(currentTime)
-            ok = int(currentTime) > 180 and (currentTime / totalTime) <= .92
-
-            idFile = hashlib.md5()
-            for i in name:
-                idFile.update(str(i))
-            for i in year:
-                idFile.update(str(i))
-            idFile = str(idFile.hexdigest())
-
-            control.makeFile(control.dataPath)
-            dbcon = database.connect(control.bookmarksFile)
-            dbcur = dbcon.cursor()
-            dbcur.execute(
-                "CREATE TABLE IF NOT EXISTS bookmark ("
-                "idFile TEXT, "
-                "timeInSeconds TEXT, "
-                "UNIQUE(idFile)"
-                ");")
-            dbcur.execute("DELETE FROM bookmark WHERE idFile = '%s'" % idFile)
-            if ok:
-                dbcur.execute("INSERT INTO bookmark Values (?, ?)", (idFile, timeInSeconds))
-            dbcon.commit()
         except Exception:
             pass

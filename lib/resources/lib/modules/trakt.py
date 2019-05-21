@@ -31,6 +31,7 @@ from resources.lib.modules import client
 from resources.lib.modules import control
 from resources.lib.modules import log_utils
 from resources.lib.modules import utils
+from resources.lib.modules import bookmarks
 
 BASE_URL = 'https://api.trakt.tv'
 #BASE_URL = 'https://api-v2launch.trakt.tv'
@@ -350,6 +351,26 @@ def syncSeason(imdb):
     except:
         pass
 
+def syncMovieResumePoints():
+    try:
+        if getTraktCredentialsInfo() == False: return
+        last_movie_activities = getTraktAsJson('/sync/playback/movies')
+
+        for activity in last_movie_activities:
+            bookmarks.insert(activity['movie']['title'], activity['progress'], str(activity['movie']['year']))
+    except:
+        pass
+
+def syncEpisodeResumePoints():
+    try:
+        if getTraktCredentialsInfo() == False: return
+        last_episode_activities = getTraktAsJson('/sync/playback/episodes')
+
+        for activity in last_episode_activities:
+            episodeIdentifier = activity['show']['title'] + 'S' + str(activity['episode']['season']) + 'E' + str(activity['episode']['number'])
+            bookmarks.insert(episodeIdentifier, activity['progress'], str(activity['show']['year']))
+    except:
+        pass
 
 def markMovieAsWatched(imdb):
     if not imdb.startswith('tt'): imdb = 'tt' + imdb
