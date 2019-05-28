@@ -357,7 +357,7 @@ def syncMovieResumePoints():
         last_movie_activities = getTraktAsJson('/sync/playback/movies')
 
         for activity in last_movie_activities:
-            bookmarks.insert(activity['movie']['title'], activity['progress'], str(activity['movie']['year']))
+            bookmarks.insert(activity['movie']['title'], activity['progress'], str(activity['movie']['year']), 'movie')
     except:
         pass
 
@@ -368,7 +368,7 @@ def syncEpisodeResumePoints():
 
         for activity in last_episode_activities:
             episodeIdentifier = activity['show']['title'] + 'S' + str(activity['episode']['season']) + 'E' + str(activity['episode']['number'])
-            bookmarks.insert(episodeIdentifier, activity['progress'], str(activity['show']['year']))
+            bookmarks.insert(episodeIdentifier, activity['progress'], str(activity['show']['year']), 'episode')
     except:
         pass
 

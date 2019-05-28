@@ -21,6 +21,7 @@ import xbmc, xbmcaddon, xbmcgui
 from resources.lib.modules import control
 from resources.lib.modules import trakt
 from resources.lib.modules import cache
+from resources.lib.modules import bookmarks
 
 sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1])
 artPath = control.artPath() ; addonFanart = control.addonFanart()
@@ -125,6 +126,7 @@ class navigator:
 #######################################################################
 
     def movies(self, lite=False):
+        self.addDirectoryItem('Resume Movie', 'resumeItems&content=movie', 'search.png', 'DefaultMovies.png')
         if self.getMenuEnabled('navi.moviegenre') == True:
             self.addDirectoryItem(32011, 'movieGenres', 'genres.png', 'DefaultMovies.png')
         if self.getMenuEnabled('navi.movieyears') == True:
@@ -298,6 +300,24 @@ class navigator:
         if len(control.listDir(tv_downloads)[0]) > 0:
             self.addDirectoryItem(32002, tv_downloads, 'tvshows.png', 'DefaultTVShows.png', isAction=False)
         self.endDirectory()
+
+    def resumable_items(self, content_type):
+        bookmark_list = bookmarks.get_all(content_type)
+
+        for bookmark in bookmark_list:
+            png_name = ''
+            thumb_name = ''
+            if content_type is 'movie':
+                thumb_name = 'movies.png'
+                png_name = 'DefaultMovies.png'
+            else:
+                thumb_name = 'tvshows.png'
+                png_name = 'DefaultTVShows.png'
+            self.addDirectoryItem(bookmark.meta['title'], 'play&title={0}&year={1}'.format(bookmark.meta['title'], bookmark.meta['year']), thumb_name, png_name)
+
+
+        self.endDirectory()
+
 
     def search(self):
         self.addDirectoryItem(32001, 'movieSearch', 'search.png', 'DefaultMovies.png')
