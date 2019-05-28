@@ -69,7 +69,7 @@ class player(xbmc.Player):
             self.ids = dict((k, v) for k, v in self.ids.iteritems() if not v == '0')
 
             poster, thumb, meta = self.getMeta(meta)
-
+            self.meta = meta
             item = control.item(path=url)
             item.setArt({'icon': thumb, 'thumb': thumb, 'poster': poster,
                          'tvshow.poster': poster, 'season.poster': poster})
@@ -305,7 +305,7 @@ class player(xbmc.Player):
 
         try:
             progressPercentage = (self.currentTime / self.totalTime * 100)
-            bookmarks.insert(self.name, progressPercentage, self.year)
+            bookmarks.insert(self.name, progressPercentage, self.meta, self.content)
 
             if progressPercentage >= 90:
                 self.libForPlayback()
