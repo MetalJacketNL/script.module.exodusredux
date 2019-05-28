@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.module.exodusredux" name="Exodus Redux Module" version="2.0.3" provider-name="I-A-C">
+<addon id="script.module.exodusrefix" name="Exodus Refix Module" version="1.0.0" provider-name="MetalJacketNL">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
 		<import addon="script.module.beautifulsoup4"/>
@@ -7,6 +7,6 @@
 	<extension point="xbmc.python.module" library="lib" />
 	<extension point="xbmc.addon.metadata">
 		<platform>all</platform>
-		<summary lang="en">Exodus Redux</summary>
+		<summary lang="en">Exodus Refix</summary>
 	</extension>
 </addon>

@@ -194,17 +194,17 @@ def get_plugin_url(queries):
 def artPath():
     theme = appearance()
     if theme in ['-', '']: return
-    elif condVisibility('System.HasAddon(script.exodusredux.artwork)'):
-        return os.path.join(xbmcaddon.Addon('script.exodusredux.artwork').getAddonInfo('path'), 'resources', 'media', theme)
+    elif condVisibility('System.HasAddon(script.exodusrefix.artwork)'):
+        return os.path.join(xbmcaddon.Addon('script.exodusrefix.artwork').getAddonInfo('path'), 'resources', 'media', theme)
 
 
 def appearance():
-    appearance = setting('appearance.1').lower() if condVisibility('System.HasAddon(script.exodusredux.artwork)') else setting('appearance.alt').lower()
+    appearance = setting('appearance.1').lower() if condVisibility('System.HasAddon(script.exodusrefix.artwork)') else setting('appearance.alt').lower()
     return appearance
 
 
 def artwork():
-    execute('RunPlugin(plugin://script.exodusredux.artwork)')
+    execute('RunPlugin(plugin://script.exodusrefix.artwork)')
 
 
 def infoDialog(message, heading=addonInfo('name'), icon='', time=3000, sound=False):
@@ -224,8 +224,8 @@ def selectDialog(list, heading=addonInfo('name')):
 
 
 def metaFile():
-    if condVisibility('System.HasAddon(script.exodusredux.metadata)'):
-        return os.path.join(xbmcaddon.Addon('script.exodusredux.metadata').getAddonInfo('path'), 'resources', 'data', 'meta.db')
+    if condVisibility('System.HasAddon(script.exodusrefix.metadata)'):
+        return os.path.join(xbmcaddon.Addon('script.exodusrefix.metadata').getAddonInfo('path'), 'resources', 'data', 'meta.db')
 
 
 def apiLanguage(ret_name=None):
