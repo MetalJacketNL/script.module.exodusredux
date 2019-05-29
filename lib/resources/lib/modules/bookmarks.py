@@ -1,4 +1,4 @@
-import hashlib, json
+import hashlib, json, xbmc
 
 from resources.lib.modules import control
 
@@ -90,7 +90,8 @@ def insert(name, progress_percentage, meta, content_type):
 
         dbcon.commit()
         dbcon.close()
-    except Exception:
+    except Exception as e:
+        xbmc.log(str(e))
         pass
 
 def generate_file_id(name, year):

@@ -1448,9 +1448,9 @@ class sources:
         return title
 
     def getConstants(self):
-        self.itemProperty = 'plugin.video.exodusredux.container.items'
+        self.itemProperty = 'plugin.video.exodusrefix.container.items'
 
-        self.metaProperty = 'plugin.video.exodusredux.container.meta'
+        self.metaProperty = 'plugin.video.exodusrefix.container.meta'
 
 	#from resources.lib.sources import sources
 #	from lambdascrapers import sources
